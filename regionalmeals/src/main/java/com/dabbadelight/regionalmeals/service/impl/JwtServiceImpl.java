@@ -27,10 +27,23 @@ public class JwtServiceImpl implements JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
+@Override
+public String generateToken(UserDetails userDetails) {
+    Map<String, Object> extraClaims = new HashMap<>();
+
+    // Assuming your UserDetails implementation has a method to get authorities
+    // Extract role name from authorities (adjust if your implementation differs)
+        String role = userDetails.getAuthorities().stream()
+            .findFirst()
+            .map(grantedAuthority -> grantedAuthority.getAuthority().replace("ROLE_", "")) // strip prefix
+            .orElse("USER");
+
+        extraClaims.put("role", role);
+
+
+    return generateToken(extraClaims, userDetails);
+}
+
 
     @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -48,7 +61,7 @@ public class JwtServiceImpl implements JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -61,7 +74,8 @@ public class JwtServiceImpl implements JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    @Override
+    public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

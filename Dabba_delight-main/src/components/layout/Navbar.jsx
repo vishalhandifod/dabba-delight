@@ -17,13 +17,26 @@ const Navbar = () => {
     navigate('/login');
   };
 
-  const navLinks = [
-    { name: 'Home', path: '/', icon: Home },
-    { name: 'About Us', path: '/about', icon: Users },
-    { name: 'Menus', path: '/menus', icon: MenuIcon },
-    { name: 'Users', path: '/userlist', icon: Users },
-    { name: 'Orders', path: '/orders', icon: ShoppingCart },
-  ];
+  // Filter navigation links based on user role
+  const getFilteredNavLinks = () => {
+    const allNavLinks = [
+      { name: 'Home', path: '/', icon: Home },
+      { name: 'About Us', path: '/about', icon: Users },
+      { name: 'Menu', path: '/products', icon: MenuIcon },
+      { name: 'Users', path: '/userlist', icon: Users, adminOnly: true }, // Mark as admin only
+      { name: 'Orders', path: '/orders', icon: ShoppingCart },
+    ];
+
+    // If user role is 'USER', filter out admin-only links
+    if (session?.role === 'ROLE_USER') {
+      return allNavLinks.filter(link => !link.adminOnly);
+    }
+
+    // For admin users or other roles, show all links
+    return allNavLinks;
+  };
+
+  const navLinks = getFilteredNavLinks();
 
   return (
     <nav className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 shadow-lg sticky top-0 z-50">
@@ -67,7 +80,7 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2 z-50">
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <Settings className="h-4 w-4" />
@@ -75,10 +88,10 @@ const Navbar = () => {
                     </Link>
 
                     {/* Only show Orders for USER role */}
-                    {session.role === 'USER' && (
+                    {session.role === 'ROLE_USER' && (
                       <Link
                         to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                        className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                         onClick={() => setDropdownOpen(false)}
                       >
                         <ShoppingCart className="h-4 w-4" />
@@ -88,7 +101,7 @@ const Navbar = () => {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                      className="w-full text-left  px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Logout</span>
@@ -122,6 +135,79 @@ const Navbar = () => {
             </Button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {isOpen && (
+          <div
+            className="md:hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/10 rounded-lg mt-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-white/20 ${
+                    location.pathname === link.path ? 'bg-white/30 font-semibold' : ''
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <link.icon className="h-5 w-5" />
+                  <span>{link.name}</span>
+                </Link>
+              ))}
+
+              {session ? (
+                <div className="border-t border-white/20 pt-2 mt-2">
+                  <Link
+                    to="/profile"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-white/20"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Settings className="h-5 w-5" />
+                    <span>Edit Profile</span>
+                  </Link>
+
+                  {session.role === 'USER' && (
+                    <Link
+                      to="/orders"
+                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-white/20"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      <span>My Orders</span>
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="w-full text-left flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-white/20"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-white hover:bg-white/20 ${
+                    location.pathname === '/login' ? 'bg-white/30 font-semibold' : ''
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Users className="h-5 w-5" />
+                  <span>Log-in</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

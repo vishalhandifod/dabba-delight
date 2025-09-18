@@ -1,17 +1,20 @@
-// lib/api.js
 import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:8080/api',
-  withCredentials: true,
+  withCredentials: true, // This will automatically send cookies
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('dabba_delight_token'); // match LoginPage
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Response interceptor to handle token expiration
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid, dispatch auth error event
+      window.dispatchEvent(new CustomEvent('auth-error'));
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default api;

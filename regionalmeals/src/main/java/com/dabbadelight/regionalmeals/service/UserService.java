@@ -5,12 +5,15 @@ import java.util.List;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.dabbadelight.regionalmeals.model.User.User;
+import com.dabbadelight.regionalmeals.model.enums.Role;
 
 public interface UserService {
 
     User createUser(User user);
 
     User getUserById(Long id);
+
+     List<User> getUsersByRole(Role role);
 
     List<User> getAllUsers();
 
