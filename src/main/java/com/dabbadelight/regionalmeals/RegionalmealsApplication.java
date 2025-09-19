@@ -1,0 +1,13 @@
+package com.dabbadelight.regionalmeals;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class RegionalmealsApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(RegionalmealsApplication.class, args);
+	}
+
+}
