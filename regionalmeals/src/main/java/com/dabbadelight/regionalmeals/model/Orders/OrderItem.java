@@ -41,9 +41,9 @@ public class OrderItem {
     private int quantity;
 
     @Column(nullable = false)
-    private int priceAtPurchase;
+    private double priceAtPurchase;
 
-    public int getTotal() {
+    public double getTotal() {
         return quantity * priceAtPurchase;
     }
 

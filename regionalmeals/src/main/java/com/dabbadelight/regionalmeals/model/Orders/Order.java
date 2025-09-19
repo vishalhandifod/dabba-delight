@@ -1,5 +1,6 @@
 package com.dabbadelight.regionalmeals.model.Orders;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.dabbadelight.regionalmeals.model.User.User;
@@ -18,8 +19,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +33,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "orders")
-
 public class Order {
 
     @Id
@@ -58,16 +61,31 @@ public class Order {
     private List<OrderItem> orderItems;
 
     @Column(nullable = false)
-    private int totalAmount;
+    private double totalAmount;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     public void calculateTotalAmount() {
-        if (orderItems != null) {
+        if (orderItems != null && !orderItems.isEmpty()) {
             this.totalAmount = orderItems.stream()
-                                        .mapToInt(OrderItem::getTotal)
-                                        .sum();
-        } else { 
+                                         .mapToDouble(OrderItem::getTotal)
+                                         .sum();
+        } else {
             this.totalAmount = 0;
         }
     }
-
 }

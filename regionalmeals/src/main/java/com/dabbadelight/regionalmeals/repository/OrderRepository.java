@@ -13,6 +13,10 @@ import com.dabbadelight.regionalmeals.model.enums.OrderStatus;
 public interface OrderRepository extends JpaRepository<Order, Long>{
 
     List<Order> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
+    List<Order> findByOrderStatusOrderByCreatedAtDesc(OrderStatus orderStatus);
+    List<Order> findByUserOrderByCreatedAtDesc(User user);
+
+    List<Order> findByOrderStatus(OrderStatus orderStatus);
 
 }
 

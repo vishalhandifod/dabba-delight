@@ -1,5 +1,6 @@
 package com.dabbadelight.regionalmeals.model.Kitchen;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.dabbadelight.regionalmeals.model.Orders.OrderItem;
@@ -14,7 +15,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,7 +31,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "item")
-
 public class Item {
 
     @Id
@@ -43,23 +47,48 @@ public class Item {
     @Column(nullable = false, length = 500)
     private String details;
 
+    @DecimalMin(value = "0.0", message = "Price must be non-negative")
     @Column(nullable = false)
-    private int price;
+    private double price;
 
+    @Min(value = 0, message = "Stock must be non-negative")
     @Column(nullable = false)
     private int stock;
 
     @Column(nullable = false)
     private boolean isVeg;
 
+    @Column(name = "is_available", nullable = false)
+    private boolean isAvailable = true;
+
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
+
+    @Column(name = "updated_by")
+    private String updatedBy;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @ManyToOne
-    @JoinColumn(name = "menu_id")
+    @JoinColumn(name = "menu_id", nullable = false)
     @JsonBackReference(value = "menu-item")
     private Menu menu;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference(value = "item-orderitem")
-    private List<OrderItem> orderItem;
+    private List<OrderItem> orderItems;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

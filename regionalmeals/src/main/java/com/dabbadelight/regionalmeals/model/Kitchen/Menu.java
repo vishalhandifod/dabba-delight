@@ -1,5 +1,6 @@
 package com.dabbadelight.regionalmeals.model.Kitchen;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -11,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -39,14 +42,42 @@ public class Menu {
     @Size(max = 500, message = "Menu details can atmost have 500 characters.")
     private String details;
 
-    private int rating;
+    private int rating = 0;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
+    @Column(name = "created_by", nullable = false)
+    private String createdBy;
+
+    @Column(name = "updated_by")
+    private String updatedBy;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "menu-item")
-    private List<Item> item;
+    private List<Item> items;
 
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "menu-address")
-    private List<KitchenAddress> kitchenAddress;
+    private List<KitchenAddress> kitchenAddresses;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+    
+    public boolean isActive() {
+        return isActive;
+    }
 }

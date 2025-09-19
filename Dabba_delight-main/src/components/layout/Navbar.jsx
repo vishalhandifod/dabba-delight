@@ -23,6 +23,7 @@ const Navbar = () => {
       { name: 'Home', path: '/', icon: Home },
       { name: 'About Us', path: '/about', icon: Users },
       { name: 'Menu', path: '/products', icon: MenuIcon },
+      { name: 'Add Menu', path: '/menus', icon: MenuIcon, adminOnly: true }, // Mark as admin only
       { name: 'Users', path: '/userlist', icon: Users, adminOnly: true }, // Mark as admin only
       { name: 'Orders', path: '/orders', icon: ShoppingCart },
     ];

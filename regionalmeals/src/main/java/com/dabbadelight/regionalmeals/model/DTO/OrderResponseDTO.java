@@ -1,5 +1,6 @@
 package com.dabbadelight.regionalmeals.model.DTO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.dabbadelight.regionalmeals.model.enums.OrderStatus;
@@ -36,7 +37,10 @@ public class OrderResponseDTO {
     //order items;
 
     private List<OrderItemDTO> items;
-    private int totalAmount;
+    private double totalAmount;
+
+     private LocalDateTime createdAt;   // Add this field
+    private LocalDateTime updatedAt; 
 
     @Data
     @Builder
@@ -47,8 +51,9 @@ public class OrderResponseDTO {
         private Long itemId;
         private String itemName;
         private int quantity;
-        private int price;
-        private int total;
+        private double price;
+        private double total;
+        private boolean veg;
     }
 
 }

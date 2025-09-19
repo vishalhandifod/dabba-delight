@@ -17,20 +17,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderRequestDTO {
 
-    private Long userId;  // ✅ send only ID, not whole user object
+    private Long userId;  // send ID only
     private PaymentMode paymentMode;
     private PaymentStatus paymentStatus;
     private OrderStatus orderStatus;
 
-    private List<OrderItemRequestDTO> orderItems;
+    private List<OrderItemRequestDTO> orderItems;  // Note: OrderItemRequestDTO (not OrderItemDTO)
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class OrderItemRequestDTO {
+    public static class OrderItemRequestDTO {     // use this name in service
         private Long itemId;
         private int quantity;
-        private int priceAtPurchase;
+        private double priceAtPurchase;
+        private boolean veg;
     }
 }
