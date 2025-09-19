@@ -37,7 +37,7 @@ public class MenuController {
             logger.info("Menu created by {}: {}", auth.getName(), savedMenu.getId());
             return ResponseEntity.status(201).body(savedMenu);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage()); // <-- "Each admin can create only one menu."
         } catch (Exception e) {
             logger.error("Error creating menu", e);
             return ResponseEntity.status(500).body("Error creating menu: " + e.getMessage());
@@ -45,14 +45,16 @@ public class MenuController {
     }
 
     // ========================= READ =========================
-    @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
+    // Fetch menu by ID (also accessible to all roles)
+    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPERADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<Menu> getMenuById(@PathVariable Long id) {
         Menu menu = menuService.getMenuById(id);
         return ResponseEntity.ok(menu);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
+    // Any role (USER, ADMIN, SUPERADMIN) can view menus
+    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPERADMIN')")
     @GetMapping
     public ResponseEntity<List<Menu>> getAllMenus(@RequestParam(defaultValue = "false") boolean includeInactive) {
         List<Menu> menus = includeInactive ? menuService.getAllMenus() : menuService.getActiveMenus();
@@ -106,10 +108,22 @@ public class MenuController {
     }
 
     // ========================= DELETE =========================
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMenu(@PathVariable Long id) {
-        menuService.deleteMenu(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteMenu(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUser = auth.getName();
+        String role = auth.getAuthorities().iterator().next().getAuthority();
+
+        try {
+            menuService.deleteMenu(id, currentUser, role);
+            logger.info("Menu with id {} deleted by {}", id, currentUser);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(403).body(e.getMessage()); // Forbidden
+        } catch (Exception e) {
+            logger.error("Error deleting menu", e);
+            return ResponseEntity.status(500).body("Error deleting menu: " + e.getMessage());
+        }
     }
 }

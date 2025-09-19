@@ -10,7 +10,7 @@ public interface MenuService {
     List<Menu> getAllMenus();
     List<Menu> getActiveMenus();
     Menu updateMenu(Long id, Menu menu);
-    void deleteMenu(Long id);
+    void deleteMenu(Long id, String currentUser, String role);
     
     // Status operations
     Menu toggleMenuStatus(Long id, String updatedBy);

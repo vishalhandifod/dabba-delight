@@ -33,8 +33,10 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     
     // Find menus by name containing (case insensitive search)
     List<Menu> findByNameContainingIgnoreCaseAndIsActiveTrueOrderByCreatedAtDesc(String name);
-    
-    // Count active menus by creator
-    @Query("SELECT COUNT(m) FROM Menu m WHERE m.createdBy = :createdBy AND m.isActive = true")
-    long countActiveMenusByCreatedBy(@Param("createdBy") String createdBy);
+
+    // Count all menus created by a specific email
+    @Query("SELECT COUNT(m) FROM Menu m WHERE m.createdBy = :createdBy")
+    long countMenusByCreatedBy(@Param("createdBy") String createdBy);
+
+
 }

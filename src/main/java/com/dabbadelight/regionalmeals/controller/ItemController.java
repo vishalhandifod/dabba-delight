@@ -44,6 +44,16 @@ public class ItemController {
     }
 
     // ========================= READ =========================
+
+    // Fetch all menus along with their items (for USER view)
+    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPERADMIN')")
+    @GetMapping("/all-with-items")
+    public ResponseEntity<List<Menu>> getMenusWithItems() {
+        List<Menu> menus = menuService.getActiveMenus(); // only active menus
+        menus.forEach(menu -> menu.setItems(itemService.getItemsByMenuId(menu.getId())));
+        return ResponseEntity.ok(menus);
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN','USER')")
     @GetMapping("/{menuId}/items")
     public ResponseEntity<List<Item>> getItemsByMenu(@PathVariable Long menuId) {

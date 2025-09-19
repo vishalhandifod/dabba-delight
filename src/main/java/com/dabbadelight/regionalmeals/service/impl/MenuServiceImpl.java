@@ -18,18 +18,29 @@ public class MenuServiceImpl implements MenuService {
         this.menuRepository = menuRepository;
     }
 
+    // Limit one menu per admin
+    // Super Admin can still create multiple menus
     @Override
     public Menu createMenu(Menu menu) {
-        // Validate rating
+        // 1. Validate rating
         if (menu.getRating() < 0 || menu.getRating() > 5) {
             throw new IllegalArgumentException("Rating must be between 0 and 5");
         }
-        
-        // Set default values if not provided
+
+        // 2. Check if this email (admin) already has a menu
+        long count = menuRepository.countMenusByCreatedBy(menu.getCreatedBy());
+        if (count > 0) {
+            throw new IllegalArgumentException(
+                    "Each admin (email: " + menu.getCreatedBy() + ") can create only one menu."
+            );
+        }
+
+        // 3. Set default rating if not provided
         if (menu.getRating() == 0) {
             menu.setRating(0);
         }
-        
+
+        // 4. Save the menu
         return menuRepository.save(menu);
     }
 
@@ -68,6 +79,24 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    public void deleteMenu(Long id, String currentUser, String role) {
+        Menu menu = getMenuById(id);
+
+        if ("SUPERADMIN".equals(role)) {
+            // ✅ SuperAdmin can delete any menu
+            menuRepository.delete(menu);
+        } else if ("ADMIN".equals(role)) {
+            // ✅ Admin can delete only their own menu
+            if (!menu.getCreatedBy().equals(currentUser)) {
+                throw new IllegalArgumentException("You are not authorized to delete this menu.");
+            }
+            menuRepository.delete(menu);
+        } else {
+            throw new IllegalArgumentException("You are not authorized to delete menus.");
+        }
+    }
+
+    @Override
     public Menu toggleMenuStatus(Long id, String updatedBy) {
         Menu menu = getMenuById(id);
         menu.setActive(!menu.isActive());
@@ -75,13 +104,13 @@ public class MenuServiceImpl implements MenuService {
         return menuRepository.save(menu);
     }
 
-    @Override
-    public void deleteMenu(Long id) {
-        Menu menu = getMenuById(id);
-        // You might want to check if there are any items associated with this menu
-        // and handle them accordingly (cascade delete or prevent deletion)
-        menuRepository.delete(menu);
-    }
+//    @Override
+//    public void deleteMenu(Long id) {
+//        Menu menu = getMenuById(id);
+//        // You might want to check if there are any items associated with this menu
+//        // and handle them accordingly (cascade delete or prevent deletion)
+//        menuRepository.delete(menu);
+//    }
 
     @Override
     public List<Menu> getMenusByCreatedBy(String createdBy) {

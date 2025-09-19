@@ -48,7 +48,7 @@ public class Menu {
     private boolean isActive = true;
 
     @Column(name = "created_by", nullable = false)
-    private String createdBy;
+    private String createdBy; // This is the Hotel/Restaurant Owner
 
     @Column(name = "updated_by")
     private String updatedBy;
