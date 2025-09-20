@@ -25,6 +25,7 @@ import ItemPage from './pages/ItemPage';
 import OrderPage from './pages/OrderPage';
 import AddressPage from './pages/AddressPage';
 import KitchenAddressPage from './pages/KitchenAddressPage';
+import PublicRoute from './components/layout/PublicRoute';
 
 function App() {
   React.useEffect(() => {
@@ -43,10 +44,18 @@ function App() {
           <PageWrapper>
             <Routes>
               {/* Public Routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutUsPage />} />
+              <Route path="/login" element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              } />
+              <Route path="/signup" element={
+                <PublicRoute>
+                  <SignUpPage />
+                </PublicRoute>
+              } />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutUsPage />} />
 
                 <Route path="/products" element={<ProductsPage />} />
               {/* Protected Routes */}

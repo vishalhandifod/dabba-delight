@@ -179,7 +179,9 @@ const HomePage = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-orange-800 font-bold text-lg px-10 py-4 rounded-full shadow-xl transform hover:scale-105 transition-transform">
+            <Button
+            onClick={() => navigate('/products')}
+            size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-orange-800 font-bold text-lg px-10 py-4 rounded-full shadow-xl transform hover:scale-105 transition-transform">
               Order Your Dabba Today!
             </Button>
           </motion.div>

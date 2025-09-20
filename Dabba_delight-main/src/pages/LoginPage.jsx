@@ -58,7 +58,7 @@ const LoginPage = () => {
       await login();
       
       toast.success('Login successful!');
-      navigate("/products");
+      navigate("/");
       
     } catch (error) {
       console.error('Login error:', error);

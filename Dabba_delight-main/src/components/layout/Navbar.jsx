@@ -27,6 +27,9 @@ const Navbar = () => {
       { name: 'Users', path: '/userlist', icon: Users, adminOnly: true }, // Mark as admin only
       { name: 'Orders', path: '/orders', icon: ShoppingCart },
     ];
+  if (!session) {
+    return allNavLinks.filter(link => !link.adminOnly && !link.protectedOnly);
+  }
 
     // If user role is 'USER', filter out admin-only links
     if (session?.role === 'ROLE_USER') {

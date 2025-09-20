@@ -2,6 +2,7 @@ package com.dabbadelight.regionalmeals.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -37,11 +38,12 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
-                .requestMatchers("/api/users/create-superadmin").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/users/check-user").permitAll()
                 .requestMatchers("/api/users/**").permitAll() // For user registration
                 .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers( "/api/menu/active").permitAll()
+                .requestMatchers( "/api/item/menu/**").permitAll()
                 // Swagger/OpenAPI endpoints (if you're using them)
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                 // All other endpoints require authentication
