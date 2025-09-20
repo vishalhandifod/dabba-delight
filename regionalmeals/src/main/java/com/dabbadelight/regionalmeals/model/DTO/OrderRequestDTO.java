@@ -17,7 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderRequestDTO {
 
-    private Long userId;  // send ID only
+    private Long userId;       // send ID only
+    private Long addressId;    // <-- Add this field for checkout address
     private PaymentMode paymentMode;
     private PaymentStatus paymentStatus;
     private OrderStatus orderStatus;
@@ -28,10 +29,10 @@ public class OrderRequestDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class OrderItemRequestDTO {     // use this name in service
+    public static class OrderItemRequestDTO {
         private Long itemId;
         private int quantity;
         private double priceAtPurchase;
-        private boolean veg;
+        // private boolean veg;  // Remove this, system determines if item is veg
     }
 }

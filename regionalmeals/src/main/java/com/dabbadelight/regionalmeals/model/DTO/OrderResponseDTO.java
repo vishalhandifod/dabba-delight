@@ -48,6 +48,7 @@ public class OrderResponseDTO {
     @AllArgsConstructor
     public static class OrderItemDTO {
         
+        private Long orderItemId;
         private Long itemId;
         private String itemName;
         private int quantity;
