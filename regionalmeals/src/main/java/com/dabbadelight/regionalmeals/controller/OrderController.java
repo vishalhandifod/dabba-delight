@@ -5,18 +5,11 @@ import java.util.Map;
 
 import com.dabbadelight.regionalmeals.model.User.User;
 import com.dabbadelight.regionalmeals.model.enums.OrderStatus;
+import com.dabbadelight.regionalmeals.model.enums.Role;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.dabbadelight.regionalmeals.model.DTO.OrderRequestDTO;
 import com.dabbadelight.regionalmeals.model.DTO.OrderResponseDTO;
@@ -33,58 +26,58 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    // ================= User Endpoints =================
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequest) {
+        User currentUser = orderService.getCurrentLoggedInUser();
+        orderRequest.setUserId(currentUser.getId());
         OrderResponseDTO savedOrder = orderService.createOrder(orderRequest);
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
 
     @GetMapping("{id}")
     public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {
+        User currentUser = orderService.getCurrentLoggedInUser();
         OrderResponseDTO order = orderService.getOrderById(id);
+
+        if (currentUser.getRole() != Role.ADMIN && !order.getUserId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return ResponseEntity.ok(order);
     }
 
     @GetMapping
     public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+        User currentUser = orderService.getCurrentLoggedInUser();
+        List<OrderResponseDTO> orders = (currentUser.getRole() == Role.ADMIN)
+                ? orderService.getAllOrders()
+                : orderService.getOrdersByUserId(currentUser.getId());
+
+        return ResponseEntity.ok(orders);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> updateOrder(@PathVariable Long id, @RequestBody Order order) {
+        User currentUser = orderService.getCurrentLoggedInUser();
+        Order existingOrder = orderService.getOrderEntityById(id);
+
+        if (currentUser.getRole() != Role.ADMIN && !existingOrder.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Order updatedOrder = orderService.updateOrder(id, order);
         return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
     }
 
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
-            @PathVariable Long orderId,
-            @RequestBody Map<String, String> statusRequest) {
-
-        String statusStr = statusRequest.get("status");
-        OrderStatus status;
-        try {
-            status = OrderStatus.valueOf(statusStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        // Fetch the logged-in user from DB
-        User currentUser = orderService.getCurrentLoggedInUser(); // make getCurrentLoggedInUser() public
-
-        Order updatedOrder = orderService.updateOrderStatus(orderId, status, currentUser);
-        return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
-    }
-
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        orderService.deleteOrder(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/user/{userId}/pending")
     public ResponseEntity<OrderResponseDTO> getOrCreatePendingOrder(@PathVariable Long userId) {
+        User currentUser = orderService.getCurrentLoggedInUser();
+        if (currentUser.getRole() != Role.ADMIN && !userId.equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Order order = orderService.getOrCreatePendingOrderByUserId(userId);
         return ResponseEntity.ok(orderService.getOrderById(order.getId()));
     }
@@ -94,14 +87,78 @@ public class OrderController {
             @PathVariable Long orderId,
             @RequestBody OrderRequestDTO.OrderItemRequestDTO itemRequest) {
 
+        User currentUser = orderService.getCurrentLoggedInUser();
+        Order order = orderService.getOrderEntityById(orderId);
+
+        if (currentUser.getRole() != Role.ADMIN && !order.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Order updatedOrder = orderService.addItemToOrder(orderId, itemRequest.getItemId(), itemRequest.getQuantity());
         return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
     }
 
     @DeleteMapping("/{orderId}/items/{orderItemId}")
-    public ResponseEntity<OrderResponseDTO> removeItemFromOrder(@PathVariable Long orderId,
-                                                                @PathVariable Long orderItemId) {
+    public ResponseEntity<OrderResponseDTO> removeItemFromOrder(
+            @PathVariable Long orderId,
+            @PathVariable Long orderItemId) {
+
+        User currentUser = orderService.getCurrentLoggedInUser();
+        Order order = orderService.getOrderEntityById(orderId);
+
+        if (currentUser.getRole() != Role.ADMIN && !order.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Order updatedOrder = orderService.removeItemFromOrder(orderId, orderItemId);
         return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+        User currentUser = orderService.getCurrentLoggedInUser();
+        Order order = orderService.getOrderEntityById(id);
+
+        if (currentUser.getRole() != Role.ADMIN && !order.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ================= Admin Endpoints =================
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestBody Map<String, String> statusRequest) {
+
+        User currentUser = orderService.getCurrentLoggedInUser();
+        if (currentUser.getRole() != Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String statusStr = statusRequest.get("status");
+        OrderStatus status;
+        try {
+            status = OrderStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Order updatedOrder = orderService.updateOrderStatus(orderId, status, currentUser);
+        return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<List<OrderResponseDTO>> getOrdersForAdmin() {
+        User currentUser = orderService.getCurrentLoggedInUser();
+        if (currentUser.getRole() != Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<OrderResponseDTO> orders = orderService.getOrdersForAdmin(currentUser);
+        return ResponseEntity.ok(orders);
     }
 }

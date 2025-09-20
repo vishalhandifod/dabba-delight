@@ -42,6 +42,12 @@ public class Order {
     private OrderStatus orderStatus;
 
     @ManyToOne
+    @JoinColumn(name = "admin_id")
+    @JsonBackReference(value = "admin-orders")
+    private User admin;
+
+
+    @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference(value = "user-orders")
     private User user;

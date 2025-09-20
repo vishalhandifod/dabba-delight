@@ -11,26 +11,40 @@ import jakarta.transaction.Transactional;
 
 public interface OrderService {
 
-    // Create new order
+    // --------------------- CREATE ORDER ---------------------
     OrderResponseDTO createOrder(OrderRequestDTO request);
 
-    // Get orders
+    // --------------------- GET ORDERS ---------------------
     OrderResponseDTO getOrderById(Long id);
     List<OrderResponseDTO> getAllOrders();
     List<OrderResponseDTO> getOrdersByUserId(Long userId);
     List<OrderResponseDTO> getOrdersByStatus(OrderStatus status);
 
-    User getCurrentLoggedInUser();
+    // --------------------- ADMIN SPECIFIC ---------------------
+    /**
+     * Fetch orders visible to ADMIN role
+     */
+    List<OrderResponseDTO> getOrdersForAdmin(User admin);
 
-    // Update orders
-    Order updateOrder(Long id, Order order);
+    /**
+     * Update order status (e.g., CONFIRMED, PREPARING, DELIVERED, CANCELLED)
+     * Only ADMIN can update
+     */
     @Transactional
     Order updateOrderStatus(Long id, OrderStatus status, User currentUser);
 
-    // Delete order
+    // --------------------- CURRENT LOGGED-IN USER ---------------------
+    User getCurrentLoggedInUser();
+
+    // --------------------- UPDATE / DELETE ORDER ---------------------
+    @Transactional
+    Order updateOrder(Long id, Order order);
+    @Transactional
     void deleteOrder(Long id);
 
-    // Cart functionality
+    Order getOrderEntityById(Long id);
+
+    // --------------------- CART FUNCTIONALITY ---------------------
     Order getOrCreatePendingOrderByUserId(Long userId);
     Order addItemToOrder(Long orderId, Long itemId, int quantity);
     Order removeItemFromOrder(Long orderId, Long orderItemId);
