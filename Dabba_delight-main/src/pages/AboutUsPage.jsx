@@ -36,15 +36,15 @@ const AboutUsPage = () => (
         <h2 className="text-4xl font-bold text-center text-orange-500 mb-12">Meet Our Founders</h2>
         <div className="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
           <ProfileCard 
-            name="Priya Sharma" 
+            name="Shubhangi Chavan " 
             role="Founder & CEO" 
-            bio="Priya, a passionate foodie and former tech professional, envisioned Dabba Delight to foster community and promote healthy eating. Her grandmother's recipes are the heart of many of our meals."
+            bio="Shubhangi, a passionate foodie and former tech professional, envisioned Dabba Delight to foster community and promote healthy eating. Her grandmother's recipes are the heart of many of our meals."
             imageKey="priya-sharma"
           />
           <ProfileCard 
-            name="Rajesh Kumar" 
+            name="Naitik Asudani" 
             role="Co-Founder & COO" 
-            bio="Rajesh brings operational excellence to Dabba Delight. With a background in logistics, he ensures that every meal reaches you fresh and on time, maintaining our promise of quality and reliability."
+            bio="Naitik brings operational excellence to Dabba Delight. With a background in logistics, he ensures that every meal reaches you fresh and on time, maintaining our promise of quality and reliability."
             imageKey="rajesh-kumar"
           />
         </div>
