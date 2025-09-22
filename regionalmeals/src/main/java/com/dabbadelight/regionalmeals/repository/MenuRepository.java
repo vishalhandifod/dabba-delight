@@ -17,7 +17,8 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     
     // Find menus by creator
     List<Menu> findByCreatedByOrderByCreatedAtDesc(String createdBy);
-    
+    List<Menu> findByCreatedBy(String createdBy);
+
     // Find active menus by creator
     List<Menu> findByCreatedByAndIsActiveTrueOrderByCreatedAtDesc(String createdBy);
     

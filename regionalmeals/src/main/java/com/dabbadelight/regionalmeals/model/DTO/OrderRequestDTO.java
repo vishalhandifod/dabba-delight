@@ -22,7 +22,7 @@ public class OrderRequestDTO {
     private PaymentMode paymentMode;
     private PaymentStatus paymentStatus;
     private OrderStatus orderStatus;
-
+    private Long adminId;      
     private List<OrderItemRequestDTO> orderItems;  // Note: OrderItemRequestDTO (not OrderItemDTO)
 
     @Data

@@ -63,6 +63,7 @@ function App() {
                 <Route path="/feedback" element={<FeedbackPage />} />
                 <Route path="/contact" element={<ContactUsPage />} />
                 <Route path="/menus" element={<MenuPage />} />
+                <Route path="/address" element={<AddressPage />} />
                 <Route path="/terms" element={<TermsConditionsPage />} />
                 <Route path="/userlist" element={<UsersList />} />
                 <Route path="/item/menu/:menuId" element={<ItemPage />} />

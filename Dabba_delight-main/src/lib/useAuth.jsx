@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // You can add a logout API call here if your backend supports it
-      // await api.post('/auth/logout');
+      await api.post('/auth/logout');
       
       setSession(null);
       

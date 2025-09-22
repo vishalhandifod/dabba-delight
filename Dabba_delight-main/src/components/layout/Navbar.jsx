@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Home, Utensils, Users, Menu as MenuIcon, X, ShoppingCart, LogOut, User, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/useAuth.jsx';
-
+import api from '@/lib/api';
 const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
@@ -12,8 +12,8 @@ const Navbar = () => {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async() => {
+    await logout();
     navigate('/login');
   };
 
@@ -24,7 +24,7 @@ const Navbar = () => {
       { name: 'About Us', path: '/about', icon: Users },
       { name: 'Menu', path: '/products', icon: MenuIcon },
       { name: 'Add Menu', path: '/menus', icon: MenuIcon, adminOnly: true }, // Mark as admin only
-      { name: 'Users', path: '/userlist', icon: Users, adminOnly: true }, // Mark as admin only
+      // { name: 'Users', path: '/userlist', icon: Users, adminOnly: true }, // Mark as admin only
       { name: 'Orders', path: '/orders', icon: ShoppingCart },
     ];
   if (!session) {

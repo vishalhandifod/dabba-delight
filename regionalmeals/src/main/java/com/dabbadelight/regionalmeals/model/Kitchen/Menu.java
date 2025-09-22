@@ -3,6 +3,7 @@ package com.dabbadelight.regionalmeals.model.Kitchen;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.dabbadelight.regionalmeals.model.Orders.Order;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -66,6 +67,9 @@ public class Menu {
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "menu-address")
     private List<KitchenAddress> kitchenAddresses;
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
+@JsonManagedReference(value = "admin-orders")
+private List<Order> orders;
 
     @PrePersist
     protected void onCreate() {

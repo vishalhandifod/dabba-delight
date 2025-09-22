@@ -38,9 +38,9 @@ public class OrderResponseDTO {
 
     private List<OrderItemDTO> items;
     private double totalAmount;
-
+    private Long adminId;
      private LocalDateTime createdAt;   // Add this field
-    private LocalDateTime updatedAt; 
+    private LocalDateTime updatedAt;
 
     @Data
     @Builder

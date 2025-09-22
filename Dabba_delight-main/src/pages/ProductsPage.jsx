@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +54,7 @@ const ProductPage = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchActiveMenus();
@@ -75,7 +76,7 @@ const ProductPage = () => {
     try {
       const response = await api.get('/menu/active');
       console.log(response.data);
-            setMenus(response.data);
+      setMenus(response.data);
     } catch (error) {
       toast({ 
         title: 'Error', 
@@ -96,13 +97,14 @@ const ProductPage = () => {
             ...item,
             restaurantName: menu.name,
             restaurantRating: menu.rating,
-            restaurantLocation: menu.kitchenAddresses?.[0]?.city || 'Multiple locations'
+            restaurantLocation: menu.kitchenAddresses?.[0]?.city || 'Multiple locations',
+            menuId: menu.id // Add menuId for order creation
           }))
         )
       );
       
       const itemArrays = await Promise.all(itemPromises);
-      console.log("item",itemArrays);
+      console.log("items", itemArrays);
       const items = itemArrays.flat();
       setAllItems(items);
     } catch (error) {
@@ -200,7 +202,15 @@ const ProductPage = () => {
         });
         return;
       }
-      newCart = [...cart, { ...item, quantity: 1 }];
+      newCart = [...cart, { 
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        restaurantName: item.restaurantName,
+        menuId: item.menuId,
+        stock: item.stock,
+        quantity: 1 
+      }];
     }
     
     setCart(newCart);
@@ -244,11 +254,31 @@ const ProductPage = () => {
   };
 
   const saveCartToStorage = (cartData) => {
-    // Since localStorage is not available, we'll keep cart in memory
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('dabbadelight_cart', JSON.stringify(cartData));
+        console.log('Cart saved to localStorage:', cartData);
+      }
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error);
+      // Fallback: keep cart in memory only
+    }
   };
 
   const loadCartFromStorage = () => {
-    // Since localStorage is not available, cart starts empty
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const savedCart = localStorage.getItem('dabbadelight_cart');
+        if (savedCart) {
+          const cartData = JSON.parse(savedCart);
+          setCart(cartData);
+          console.log('Cart loaded from localStorage:', cartData);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      // Continue with empty cart
+    }
   };
 
   const clearCart = () => {
@@ -283,6 +313,19 @@ const ProductPage = () => {
     setSelectedFilter('all');
     setSortBy('name');
     setPriceRange('all');
+  };
+
+  const handleProceedToCheckout = () => {
+    if (getCartTotal() > 0) {
+      setCartOpen(false); // Close the cart sheet
+      navigate('/address');
+    } else {
+      toast({ 
+        title: 'Cart is empty', 
+        description: 'Add items to cart before checkout', 
+        variant: 'destructive' 
+      });
+    }
   };
 
   return (
@@ -389,7 +432,11 @@ const ProductPage = () => {
                           <p className="text-xs text-gray-600 mt-1">Inclusive of all taxes</p>
                         </div>
                         <div className="space-y-2">
-                          <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg" size="lg">
+                          <Button 
+                            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg" 
+                            size="lg"
+                            onClick={handleProceedToCheckout}
+                          >
                             Proceed to Checkout
                           </Button>
                           <Button 
@@ -542,7 +589,7 @@ const ProductPage = () => {
               <Card key={item.id} className="group hover:shadow-2xl transition-all duration-300 overflow-hidden bg-white/90 backdrop-blur-sm border-orange-100 hover:border-orange-300 hover:-translate-y-1">
                 <CardContent className="p-0">
                   {/* Item Image Placeholder with Gradient */}
-                  <div className="h-48 bg-gradient-to-br from-orange-400 via-red-400 to-pink-400 relative overflow-hidden">
+                   {/*<div className="h-48 bg-gradient-to-br from-orange-400 via-red-400 to-pink-400 relative overflow-hidden">
                     <div className="absolute inset-0 bg-black/20"></div>
                     <div className="absolute top-3 left-3 flex gap-2">
                       {item.isVeg ? (
@@ -568,7 +615,7 @@ const ProductPage = () => {
                         <span className="ml-1">{item.restaurantRating || 4.2}</span>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   <div className="p-4">
                     {/* Restaurant Info */}
@@ -681,8 +728,6 @@ const ProductPage = () => {
           </Button>
         </div>
       )}
-
-
     </div>
   );
 };

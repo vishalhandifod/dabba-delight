@@ -19,12 +19,14 @@ public interface OrderService {
     List<OrderResponseDTO> getAllOrders();
     List<OrderResponseDTO> getOrdersByUserId(Long userId);
     List<OrderResponseDTO> getOrdersByStatus(OrderStatus status);
+     void sendOrderConfirmationEmail(Long orderId);
 
     // --------------------- ADMIN SPECIFIC ---------------------
     /**
      * Fetch orders visible to ADMIN role
      */
-    List<OrderResponseDTO> getOrdersForAdmin(User admin);
+    List<OrderResponseDTO> getOrdersForAdmin(String adminEmail);
+    void sendOrderStatusUpdateEmail(Order order, OrderStatus newStatus);
 
     /**
      * Update order status (e.g., CONFIRMED, PREPARING, DELIVERED, CANCELLED)

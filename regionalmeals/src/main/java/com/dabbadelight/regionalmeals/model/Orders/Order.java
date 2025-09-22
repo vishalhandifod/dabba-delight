@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dabbadelight.regionalmeals.model.Kitchen.Menu;
 import com.dabbadelight.regionalmeals.model.User.Address;
 import com.dabbadelight.regionalmeals.model.User.User;
 import com.dabbadelight.regionalmeals.model.enums.OrderStatus;
@@ -41,13 +42,12 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus orderStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     @JsonBackReference(value = "admin-orders")
-    private User admin;
+    private Menu admin;
 
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonBackReference(value = "user-orders")
     private User user;
@@ -78,7 +78,8 @@ public class Order {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
+        public Menu getAdmin() { return admin; }
+    public void setAdmin(Menu admin) { this.admin = admin; }
     public void calculateTotalAmount() {
         if (orderItems != null && !orderItems.isEmpty()) {
             this.totalAmount = orderItems.stream()

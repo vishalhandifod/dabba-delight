@@ -125,6 +125,7 @@ const MenuPage = () => {
 
       const adminCreatedHotel = userMenus.length > 0 ? userMenus[0] : null;
       setAdminHotel(adminCreatedHotel);
+      // console.log("Admin Created Hotel:", adminHotel);
 
       if (adminCreatedHotel) {
         setSelectedMenuId(adminCreatedHotel.id);
@@ -191,7 +192,7 @@ const MenuPage = () => {
       });
     }
   };
-
+console.log("items:", items);
   const toggleMenuStatus = async (menuId) => {
     try {
       await api.patch(`/menu/${menuId}/toggle-status`);
@@ -449,7 +450,7 @@ const MenuPage = () => {
                     <Store className="w-6 h-6 text-blue-600" />
                     <CardTitle className="text-blue-900">Your Restaurant</CardTitle>
                   </div>
-                  {canAddHotel && (
+                  {/* {canAddHotel && (
                     <Button
                       size="sm"
                       onClick={() => setShowCreateMenuDialog(true)}
@@ -458,7 +459,7 @@ const MenuPage = () => {
                       <Plus className="w-4 h-4 mr-2" />
                       Add Restaurant
                     </Button>
-                  )}
+                  )} */}
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -472,22 +473,22 @@ const MenuPage = () => {
                           <p className="text-gray-600 mb-3 line-clamp-2">{adminHotel.details}</p>
                           
                           {/* Rating */}
-                          <div className="flex items-center gap-2 mb-3">
+                          {/* <div className="flex items-center gap-2 mb-3">
                             <div className="flex items-center">
                               {renderStars(adminHotel.rating)}
                             </div>
                             <span className="text-sm font-medium text-gray-700">
                               {adminHotel.rating}/5
                             </span>
-                          </div>
+                          </div> */}
 
                           {/* Status */}
                           <div className="flex items-center gap-2 mb-4">
                             <Badge 
-                              variant={adminHotel.isActive ? "default" : "secondary"}
-                              className={adminHotel.isActive ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}
+                              variant={adminHotel.active ? "default" : "secondary"}
+                              className={adminHotel.active ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}
                             >
-                              {adminHotel.isActive ? (
+                              {adminHotel.active ? (
                                 <>
                                   <Eye className="w-3 h-3 mr-1" />
                                   Active
@@ -524,7 +525,7 @@ const MenuPage = () => {
                           className="flex-1 border-blue-200 hover:bg-blue-50"
                           size="sm"
                         >
-                          {adminHotel.isActive ? (
+                          {adminHotel.active ? (
                             <>
                               <EyeOff className="w-4 h-4 mr-2" />
                               Deactivate
@@ -551,7 +552,7 @@ const MenuPage = () => {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    {/* <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <h4 className="font-medium text-gray-900 mb-3">Quick Actions</h4>
                       <div className="space-y-2">
                         <Button
@@ -573,7 +574,7 @@ const MenuPage = () => {
                           {adminHotel.isActive ? 'Deactivate Restaurant' : 'Activate Restaurant'}
                         </Button>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 ) : (
                   <div className="text-center py-12">
@@ -636,13 +637,13 @@ const MenuPage = () => {
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">No Menu Items</h3>
                     <p className="text-gray-600 mb-4">Start building your menu by adding your first item</p>
-                    <Button
+                    {/* <Button
                       onClick={() => document.getElementById('add-item-trigger')?.click()}
                       className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add First Item
-                    </Button>
+                    </Button> */}
                   </div>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2">
@@ -654,7 +655,7 @@ const MenuPage = () => {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="font-bold text-lg text-gray-900 truncate">{item.name}</h3>
-                                {item.isVeg ? (
+                                {item.veg ? (
                                   <Leaf className="w-5 h-5 text-green-500 flex-shrink-0" />
                                 ) : (
                                   <Drumstick className="w-5 h-5 text-red-500 flex-shrink-0" />
@@ -668,23 +669,23 @@ const MenuPage = () => {
 
                           {/* Badges */}
                           <div className="flex items-center gap-2 mb-4">
-                            <Badge 
-                              variant={item.isVeg ? "outline" : "secondary"}
-                              className={item.isVeg ? "text-green-700 border-green-300 bg-green-50" : "text-red-700 border-red-300 bg-red-50"}
+                            {/* <Badge 
+                              variant={item.veg ? "outline" : "secondary"}
+                              className={item.veg ? "text-green-700 border-green-300 bg-green-50" : "text-red-700 border-red-300 bg-red-50"}
                             >
-                              {item.isVeg ? "Vegetarian" : "Non-Vegetarian"}
-                            </Badge>
+                              {item.veg ? "Vegetarian" : "Non-Vegetarian"}
+                            </Badge> */}
                             <Badge 
-                              variant={item.isAvailable ? "default" : "destructive"}
-                              className={item.isAvailable ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}
+                              variant={item.available ? "default" : "destructive"}
+                              className={item.available ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300"}
                             >
-                              {item.isAvailable ? "Available" : "Unavailable"}
+                              {item.available ? "Available" : "Unavailable"}
                             </Badge>
-                            {item.stock < 10 && item.stock > 0 && (
+                            {/* {item.stock < 10 && item.stock > 0 && (
                               <Badge variant="outline" className="text-orange-700 border-orange-300 bg-orange-50 animate-pulse">
                                 Low Stock
                               </Badge>
-                            )}
+                            )} */}
                           </div>
 
                           {/* Price and Stock */}
@@ -694,10 +695,10 @@ const MenuPage = () => {
                                 <DollarSign className="w-4 h-4 text-green-600" />
                                 <span className="text-xl font-bold text-green-700">₹{item.price}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-600">
+                              {/* <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Package className="w-4 h-4" />
                                 <span>Stock: {item.stock}</span>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
 
@@ -726,9 +727,9 @@ const MenuPage = () => {
                             </div>
                             
                             {/* Created By */}
-                            <div className="text-xs text-gray-500">
+                            {/* <div className="text-xs text-gray-500">
                               Added by: {item.createdBy}
-                            </div>
+                            </div> */}
                           </div>
 
                           {/* Item Footer with timestamp */}

@@ -33,6 +33,7 @@ public class OrderController {
         User currentUser = orderService.getCurrentLoggedInUser();
         orderRequest.setUserId(currentUser.getId());
         OrderResponseDTO savedOrder = orderService.createOrder(orderRequest);
+         orderService.sendOrderConfirmationEmail(savedOrder.getOrderId());
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
 
@@ -54,6 +55,8 @@ public class OrderController {
         List<OrderResponseDTO> orders = (currentUser.getRole() == Role.ADMIN)
                 ? orderService.getAllOrders()
                 : orderService.getOrdersByUserId(currentUser.getId());
+
+                // System.out.println("fetched orders :" + orders);
 
         return ResponseEntity.ok(orders);
     }
@@ -130,35 +133,40 @@ public class OrderController {
     // ================= Admin Endpoints =================
 
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
-            @PathVariable Long orderId,
-            @RequestBody Map<String, String> statusRequest) {
+public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+        @PathVariable Long orderId,
+        @RequestBody Map<String, String> statusRequest) {
 
-        User currentUser = orderService.getCurrentLoggedInUser();
-        if (currentUser.getRole() != Role.ADMIN) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        String statusStr = statusRequest.get("status");
-        OrderStatus status;
-        try {
-            status = OrderStatus.valueOf(statusStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Order updatedOrder = orderService.updateOrderStatus(orderId, status, currentUser);
-        return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
+    User currentUser = orderService.getCurrentLoggedInUser();
+    if (currentUser.getRole() != Role.ADMIN) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+
+    String statusStr = statusRequest.get("status");
+    OrderStatus status;
+    try {
+        status = OrderStatus.valueOf(statusStr.toUpperCase());
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    Order updatedOrder = orderService.updateOrderStatus(orderId, status, currentUser);
+    
+    // Send email notification to customer
+    orderService.sendOrderStatusUpdateEmail(updatedOrder, status);
+    
+    return ResponseEntity.ok(orderService.getOrderById(updatedOrder.getId()));
+}
 
     @GetMapping("/admin")
     public ResponseEntity<List<OrderResponseDTO>> getOrdersForAdmin() {
         User currentUser = orderService.getCurrentLoggedInUser();
+        System.out.println("Current Admin User: " + currentUser);
         if (currentUser.getRole() != Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<OrderResponseDTO> orders = orderService.getOrdersForAdmin(currentUser);
+        List<OrderResponseDTO> orders = orderService.getOrdersForAdmin(currentUser.getEmail());
         return ResponseEntity.ok(orders);
     }
 }

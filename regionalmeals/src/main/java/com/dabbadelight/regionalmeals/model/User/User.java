@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.dabbadelight.regionalmeals.model.Orders.Order;
 import com.dabbadelight.regionalmeals.model.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -75,9 +76,10 @@ public class User implements UserDetails {
     @JsonManagedReference(value = "user-address")
     private List<Address> address;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false)
-    @JsonManagedReference(value = "user-orders")
-    private List<Order> orders;
+@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false)
+@JsonIgnore
+private List<Order> orders;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
